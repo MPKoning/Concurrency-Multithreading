@@ -9,65 +9,66 @@ import data_structures.Sorted;
 public class CoarseGrainedList<T extends Comparable<T>> implements Sorted<T> {
 
     private Lock lock = new ReentrantLock();
-    Node<T> head;
-    int counter;
-
-    public CoarseGrainedList(){
-        counter = 0;
-    }
+    Node<T> head = null;
 
     public void add(T t) {
-        if(counter == 0){
-            head = new Node<T>(t);
-            return;
-        }
-        Node<T> pred, current;
+        Node<T> previous, current;
         lock.lock();
         try{
-            pred = head;
-            current = pred.next;
-            while(t.compareTo(current.content) > 0){
-                pred = current;
-                current = current.next;
+            if(head == null){
+                head = new Node<T>(t);
+                return;
             }
-            if(t.compareTo(current.content) == 0){
-                return;
-            }else{
+            if(t.compareTo(head.content) < 0){
                 Node<T> node = new Node<T>(t);
-                node.next = current;
-                pred.next = node;
+                node.next = head;
+                head = node;
                 return;
+
+            }
+            current = head;
+            previous = null;
+
+            while(current != null){
+                if(t.compareTo(current.content) > 0){
+                    if(current.next==null){
+                        current.next = new Node<T>(t);
+                        return;
+                    }
+                    previous = current;
+                    current = current.next;
+                }else{
+                    Node<T> node = new Node<T>(t);
+                    node.next = previous.next;
+                    previous.next = node;
+                    return;
+                }
             }
 
         }catch(UnsupportedOperationException e){
             throw new UnsupportedOperationException();
         }finally{
-            counter += 1;
             lock.unlock();
         }
     }
 
     public void remove(T t) {
-        Node<T> pred, current;
+        Node<T> previous, current;
         lock.lock();
-        if(counter == 0){
-            System.out.printf("Element not in list\n");
-            return;
-        }
         try{
-            pred = head;
-            current = pred.next;
+            previous = null;
+            current = head;
             while(t.compareTo(current.content) > 0){
-                pred = current;
+                previous = current;
                 current = current.next;
             }
             if(t.compareTo(current.content) == 0){
-                pred.next = current.next;
-                counter -= 1;
-                return;
-            }else{
-                System.out.printf("node not in list\n");
-                return;
+                if(previous == null){
+                    head = current.next;
+                }else{
+                    previous.next = current.next;
+                    return;
+                }
             }
         }catch(UnsupportedOperationException e){
             throw new UnsupportedOperationException();
@@ -79,17 +80,16 @@ public class CoarseGrainedList<T extends Comparable<T>> implements Sorted<T> {
     public ArrayList<T> toArrayList() {
         ArrayList<T> list = new ArrayList<T>();
         Node<T> current;
-        //lock.lock();
-        System.out.println("test3");
+        lock.lock();
         try{
-            System.out.println("test1");
-            current = head;
-            while(current.next != null){
+            if(head != null){
+                current = head;
+                while(current.next != null){
+                    list.add(current.content);
+                    current = current.next;
+                }
                 list.add(current.content);
-                current = current.next;
-                System.out.println("test ");
             }
-            list.add(current.content);
 
         }catch(UnsupportedOperationException e){
             throw new UnsupportedOperationException();
