@@ -12,34 +12,30 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
     private Lock lock = new ReentrantLock();
 
     public void add(T t) {
+        System.out.println("adding..");
         lock.lock();
         try {
-            if(root == null) {
-                root = new Node<T>(t);
-            } else {
-                current = root;
-                while(current.t != null) {
-                    if(t.compareTo(current.t) <= 0) {
-                        if(current.left != null) {
-                            current = current.left;
-                        } else {
-                            current.left = new Node<T>(t);
-                        }
-                    } else {
-                        if(current.right != null) {
-                            current = current.right;
-                        } else {
-                            current.right = new Node<T>(t);
-                        }
-                    }
-                }
-            }
-        } finally {
+            root = addNode(root, t);
+       } finally {
             lock.unlock();
         }
     }
 
+    private Node<T> addNode(Node<T> node, T t) {
+        if(node == null) {
+            node = new Node<T>(t);
+        } else {
+            if(t.compareTo(node.t) <= 0) {
+                node.left = addNode(node.left, t);
+            } else {
+                node.right = addNode(node.right, t);
+            }
+        }
+        return node;
+    }
+
     public void remove(T t) {
+        System.out.println("removing..");
         lock.lock();
         try {
             root = removeNode(root, t);
@@ -48,32 +44,32 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         }
     }
 
-    private Node<T> removeNode(Node<T> root,T t) {
+    private Node<T> removeNode(Node<T> node,T t) {
 
-        if(root == null) return root;
-        else if(t.compareTo(root.t) < 0) {
-            root.left = removeNode(root.left, t);
-        } else if(t.compareTo(root.t) > 0) {
-            root.right = removeNode(root.right, t);
+        if(node == null) return node;
+        else if(t.compareTo(node.t) < 0) {
+            node.left = removeNode(node.left, t);
+        } else if(t.compareTo(node.t) > 0) {
+            node.right = removeNode(node.right, t);
         } else { //remove the node
-            if(root.left == null) { //if only one child/no childs
-                return root.right;
-            } else if (root.right == null) {
-                return root.left;
+            if(node.left == null) { //if only one child/no childs
+                return node.right;
+            } else if (node.right == null) {
+                return node.left;
             }
 
-            root.t = minValue(root.right);//two children, get inorder successor
-            root.right = removeNode(root.right, root.t);//delete inorder successor
+            node.t = minValue(node.right);//two children, get inorder successor
+            node.right = removeNode(node.right, node.t);//delete inorder successor
         }
     
-        return root;
+        return node;
     }
 
-    private T minValue(Node<T> root) {
-        T min = root.t;
-        while(root.left != null) {
-            min = root.left.t;
-            root = root.left;
+    private T minValue(Node<T> node) {
+        T min = node.t;
+        while(node.left != null) {
+            min = node.left.t;
+            node = node.left;
         }
         return min;
     }
