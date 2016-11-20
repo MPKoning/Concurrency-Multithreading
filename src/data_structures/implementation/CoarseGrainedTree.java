@@ -12,7 +12,6 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
     private Lock lock = new ReentrantLock();
 
     public void add(T t) {
-        System.out.println("adding..");
         lock.lock();
         try {
             root = addNode(root, t);
@@ -35,7 +34,6 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
     }
 
     public void remove(T t) {
-        System.out.println("removing..");
         lock.lock();
         try {
             root = removeNode(root, t);
@@ -45,7 +43,6 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
     }
 
     private Node<T> removeNode(Node<T> node,T t) {
-
         if(node == null) return node;
         else if(t.compareTo(node.t) < 0) {
             node.left = removeNode(node.left, t);
