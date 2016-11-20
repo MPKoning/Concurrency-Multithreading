@@ -63,7 +63,7 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             }
 
             root.t = minValue(root.right);//two children, get inorder successor
-            root.right = removeNode(root.right, t);//delete inorder successor
+            root.right = removeNode(root.right, root.t);//delete inorder successor
         }
     
         return root;
