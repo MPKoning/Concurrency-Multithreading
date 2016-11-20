@@ -19,7 +19,7 @@ public class CoarseGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             } else {
                 current = root;
                 while(current.t != null) {
-                    if(current.t.compareTo(t) <= 0) {
+                    if(t.compareTo(current.t) <= 0) {
                         if(current.left != null) {
                             current = current.left;
                         } else {
