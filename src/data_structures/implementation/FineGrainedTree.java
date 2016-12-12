@@ -18,14 +18,17 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             root = new Node<T>(t);
             headLock.unlock();
         } else {
-            headLock.unlock();
-            Node<T> dummy = new Node<T>(null);
-            dummy.lock();
-            root = addNode(root, dummy, t);
+            root = addNode(root, null, t);
         }
     }
 
     private Node<T> addNode(Node<T> node, Node<T> parent, T t) {
+        if(parent == null) {
+            headLock.unlock();
+            parent = new Node<T>(null);
+            parent.lock();
+
+        }
         if(node == null) {
             node = new Node<T>(t);
             parent.unlock();
@@ -46,10 +49,7 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         if(root == null) {
             headLock.unlock();
         } else {
-            headLock.unlock();
-            Node<T> dummy = new Node<T>(null);
-            dummy.lock();
-            root = removeNode(root, dummy, t);
+            root = removeNode(root, null, t);
         }
     }
 
@@ -58,6 +58,12 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             return node;
         }
         node.lock();
+        if(parent == null) {
+            headLock.unlock(); 
+            parent = new Node<T>(null);
+            parent.lock();
+        } 
+
         if(t.compareTo(node.t) < 0) {
             parent.unlock();
             node.left = removeNode(node.left, node, t);
@@ -65,17 +71,19 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             parent.unlock();
             node.right = removeNode(node.right, node, t);
         } else { //remove the node
-            parent.unlock();
             if(node.left == null) { //if only one child/no childs
+                parent.unlock();
                 node.unlock();
                 return node.right;
             } else if (node.right == null) {
+                parent.unlock();
                 node.unlock();
                 return node.left;
             }
             
             node.t = minValue(node.right);//two children, get inorder successor
             node.right = removeNode(node.right, node, node.t);//delete inorder successor
+            parent.unlock();
         }
         
         return node;
