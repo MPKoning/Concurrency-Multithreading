@@ -9,26 +9,22 @@ import data_structures.Sorted;
 public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
 
     private Lock lock = new ReentrantLock();
-    Node<T> head = null;
+    T dummy = null;
+    Node<T> head = new Node<T>(dummy);
+    int counter1 = 0;
+    int counter2 = 0;
 
 
     public void add(T t) {
+        counter1++;
         Node<T> newNode = new Node<T>(t);
-        if(head == null){
-            head = newNode;
-            return;
-        }
+        head.lock();
         if(head.next == null){
-            if(t.compareTo(head.content) > 0){
-                head.next = newNode;
-            }else{
-                newNode.next = head;
-                head = newNode;
-            }
+            head.next = newNode;
+            head.unlock();
             return;
         }
         Node<T> previous;
-        head.lock();
         previous = head;
         try{
             Node<T> current = previous.next;
@@ -57,6 +53,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
     }
 
     public void remove(T t) {
+        counter2++;
         Node<T> previous = null, current = null;
         head.lock();
         try{
@@ -64,7 +61,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
             current = previous.next;
             current.lock();
             try{
-                while(t.compareTo(current.content) > 0){
+                while(t.compareTo(current.content) != 0){
                     previous.unlock();
                     previous = current;
                     current = current.next;
@@ -83,16 +80,16 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
 
     public ArrayList<T> toArrayList() {
         ArrayList<T> list = new ArrayList<T>();
-        Node<T> current;
-        if(head != null){
-            current = head;
-            while(current.next != null){
+        if(head.next == null){
+            return list;
+        }
+        Node<T> current = head.next;
+        while(current.next != null){
                 list.add(current.content);
                 current = current.next;
-            }
-            list.add(current.content);
         }
-    return list;
+        list.add(current.content);
+        return list;
     }
 
     private class Node<T>{
