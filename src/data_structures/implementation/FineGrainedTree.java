@@ -46,9 +46,10 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         if(root == null) {
             headLock.unlock();
         } else {
-            root.lock();
             headLock.unlock();
-            root = removeNode(root, null, t);
+            Node<T> dummy = new Node<T>(null);
+            dummy.lock();
+            root = removeNode(root, dummy, t);
         }
     }
 
@@ -56,35 +57,26 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         if(node == null) {
             return node;
         }
-        if(parent != null) {
-            parent.lock();
-            node.lock();
-        }
+        node.lock();
         if(t.compareTo(node.t) < 0) {
-            if(parent != null) parent.unlock();
-            node.unlock();
-            parent = node;
-            node.left = removeNode(node.left, parent, t);
+            parent.unlock();
+            node.left = removeNode(node.left, node, t);
         } else if(t.compareTo(node.t) > 0) {
-            if(parent != null) parent.unlock();
-            node.unlock();
-            parent = node;
-            node.right = removeNode(node.right, parent, t);
+            parent.unlock();
+            node.right = removeNode(node.right, node, t);
         } else { //remove the node
             if(node.left == null) { //if only one child/no childs
-                if(parent != null) parent.unlock();
+                parent.unlock();
                 node.unlock();
                 return node.right;
             } else if (node.right == null) {
-                if(parent != null) parent.unlock();
+                parent.unlock();
                 node.unlock();
                 return node.left;
             }
-            if(parent != null) parent.unlock();
-            node.unlock();
-            parent = node;
+            parent.unlock();
             node.t = minValue(node.right);//two children, get inorder successor
-            node.right = removeNode(node.right, parent, node.t);//delete inorder successor
+            node.right = removeNode(node.right, node, node.t);//delete inorder successor
         }
         
         return node;
