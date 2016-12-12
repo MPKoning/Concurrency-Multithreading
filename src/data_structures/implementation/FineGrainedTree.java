@@ -65,16 +65,15 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             parent.unlock();
             node.right = removeNode(node.right, node, t);
         } else { //remove the node
+            parent.unlock();
             if(node.left == null) { //if only one child/no childs
-                parent.unlock();
                 node.unlock();
                 return node.right;
             } else if (node.right == null) {
-                parent.unlock();
                 node.unlock();
                 return node.left;
             }
-            parent.unlock();
+            
             node.t = minValue(node.right);//two children, get inorder successor
             node.right = removeNode(node.right, node, node.t);//delete inorder successor
         }
@@ -84,7 +83,8 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
 
     private T minValue(Node<T> node) {
         T min = node.t;
-        Node<T> next = null;
+        Node<T> next = new Node<T>(null);
+
         node.lock();
         while(node.left != null) {
             min = node.left.t;
@@ -93,7 +93,7 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             node.unlock();
             node = next;
         }
-        node.unlock();
+
         return min;
     }
 
