@@ -7,30 +7,30 @@ import data_structures.Sorted;
 
 public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
 
-    private Node<T> root = null;
-    private Node<T> current = null;
-    private Node<T> parent = null;
+    private TreeNode<T> root = null;
+    private TreeNode<T> current = null;
+    private TreeNode<T> parent = null;
     private Lock headLock = new ReentrantLock();
 
     public void add(T t) {
         headLock.lock();
         if(root == null) {
-            root = new Node<T>(t);
+            root = new TreeNode<T>(t);
             headLock.unlock();
         } else {
             root = addNode(root, null, t);
         }
     }
 
-    private Node<T> addNode(Node<T> node, Node<T> parent, T t) {
+    private TreeNode<T> addNode(TreeNode<T> node, TreeNode<T> parent, T t) {
         if(parent == null) {
             headLock.unlock();
-            parent = new Node<T>(null);
+            parent = new TreeNode<T>(null);
             parent.lock();
 
         }
         if(node == null) {
-            node = new Node<T>(t);
+            node = new TreeNode<T>(t);
             parent.unlock();
         } else {
             node.lock();
@@ -53,14 +53,14 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         }
     }
 
-    private Node<T> removeNode(Node<T> node, Node<T> parent, T t) {
+    private TreeNode<T> removeNode(TreeNode<T> node, TreeNode<T> parent, T t) {
         if(node == null) {
             return node;
         }
         node.lock();
         if(parent == null) {
             headLock.unlock(); 
-            parent = new Node<T>(null);
+            parent = new TreeNode<T>(null);
             parent.lock();
         } 
 
@@ -89,9 +89,9 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         return node;
     }
 
-    private T minValue(Node<T> node) {
+    private T minValue(TreeNode<T> node) {
         T min = node.t;
-        Node<T> next = new Node<T>(null);
+        TreeNode<T> next = new TreeNode<T>(null);
 
         node.lock();
         while(node.left != null) {
@@ -119,7 +119,7 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         return result;
     }
 
-    private void addToArray(Node<T> root, ArrayList<T> result) {
+    private void addToArray(TreeNode<T> root, ArrayList<T> result) {
         if(root == null) {
             return;
         } else {
@@ -132,12 +132,12 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
     }
 }
 
-class Node<T> {
+class TreeNode<T> {
     T t;
-    Node<T> left;
-    Node<T> right;
+    TreeNode<T> left;
+    TreeNode<T> right;
     ReentrantLock nodelock;
-    public Node(T t) {
+    public TreeNode(T t) {
         this.t = t;
         left = null;
         right = null;
@@ -152,3 +152,4 @@ class Node<T> {
         nodelock.unlock();
     }
 }
+
