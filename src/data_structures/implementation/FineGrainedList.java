@@ -11,20 +11,20 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
     private Lock lock = new ReentrantLock();
     //We use a dummy head
     T dummy = null;
-    Node<T> head = new Node<T>(dummy);
+    ListNode<T> head = new ListNode<T>(dummy);
 
     public void add(T t) { //Adds node to list
-        Node<T> newNode = new Node<T>(t);
+        ListNode<T> newNode = new ListNode<T>(t);
         head.lock();
         if(head.next == null){ //check if list is empty
             head.next = newNode;
             head.unlock();
             return;
         }
-        Node<T> previous;
+        ListNode<T> previous;
         previous = head;
         try{
-            Node<T> current = previous.next;
+            ListNode<T> current = previous.next;
             current.lock();
             try{
                 while(t.compareTo(current.content) > 0){ //loop through list until values are bigger than data of new node
@@ -48,7 +48,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
     }
 
     public void remove(T t) { //remove node from list
-        Node<T> previous = null, current = null;
+        ListNode<T> previous = null, current = null;
         head.lock();
         try{
             previous = head;
@@ -77,7 +77,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         if(head.next == null){ //list is empty
             return list;
         }
-        Node<T> current = head.next;
+        ListNode<T> current = head.next;
         while(current.next != null){
                 list.add(current.content);
                 current = current.next;
@@ -86,12 +86,12 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         return list;
     }
 
-    private class Node<T>{ //subclass node to keep data
+    private class ListNode<T>{ //subclass node to keep data
         public T content;
-        public Node<T> next;
+        public ListNode<T> next;
         private Lock lock;
 
-        Node(T t){
+        ListNode(T t){
             content = t;
             lock = new ReentrantLock();
         }
@@ -105,3 +105,4 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         }
     }
 }
+
