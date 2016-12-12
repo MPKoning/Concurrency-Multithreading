@@ -9,17 +9,14 @@ import data_structures.Sorted;
 public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
 
     private Lock lock = new ReentrantLock();
+    //We use a dummy head
     T dummy = null;
     Node<T> head = new Node<T>(dummy);
-    int counter1 = 0;
-    int counter2 = 0;
 
-
-    public void add(T t) {
-        counter1++;
+    public void add(T t) { //Adds node to list
         Node<T> newNode = new Node<T>(t);
         head.lock();
-        if(head.next == null){
+        if(head.next == null){ //check if list is empty
             head.next = newNode;
             head.unlock();
             return;
@@ -30,8 +27,8 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
             Node<T> current = previous.next;
             current.lock();
             try{
-                while(t.compareTo(current.content) > 0){
-                    if(current.next == null){
+                while(t.compareTo(current.content) > 0){ //loop through list until values are bigger than data of new node
+                    if(current.next == null){ //special case if node needs to be added to end of list
                         break;
                     }else{
                         previous.unlock();
@@ -42,8 +39,6 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
                 }
                 newNode.next = current;
                 previous.next = newNode;
-            }catch(Exception e){
-                e.printStackTrace();
             }finally{
                 current.unlock();
             }
@@ -52,8 +47,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         }
     }
 
-    public void remove(T t) {
-        counter2++;
+    public void remove(T t) { //remove node from list
         Node<T> previous = null, current = null;
         head.lock();
         try{
@@ -78,9 +72,9 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         }
     }
 
-    public ArrayList<T> toArrayList() {
+    public ArrayList<T> toArrayList() { // returns list
         ArrayList<T> list = new ArrayList<T>();
-        if(head.next == null){
+        if(head.next == null){ //list is empty
             return list;
         }
         Node<T> current = head.next;
@@ -92,7 +86,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
         return list;
     }
 
-    private class Node<T>{
+    private class Node<T>{ //subclass node to keep data
         public T content;
         public Node<T> next;
         private Lock lock;
@@ -101,7 +95,7 @@ public class FineGrainedList<T extends Comparable<T>> implements Sorted<T> {
             content = t;
             lock = new ReentrantLock();
         }
-
+        // lock and unlock methods
         public void lock(){
             lock.lock();
         }
