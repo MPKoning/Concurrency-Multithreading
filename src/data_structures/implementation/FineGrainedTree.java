@@ -93,6 +93,7 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             node.unlock();
             node = next;
         }
+        node.unlock();
 
         return min;
     }
