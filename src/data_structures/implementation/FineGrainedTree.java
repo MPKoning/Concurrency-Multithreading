@@ -18,9 +18,10 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
             root = new Node<T>(t);
             headLock.unlock();
         } else {
-            root.lock();
             headLock.unlock();
-            root = addNode(root, root, t);
+            Node<T> dummy = new Node<T>(null);
+            dummy.lock();
+            root = addNode(root, dummy, t);
         }
     }
 
@@ -31,11 +32,10 @@ public class FineGrainedTree<T extends Comparable<T>> implements Sorted<T> {
         } else {
             node.lock();
             parent.unlock();
-            parent = node;
             if(t.compareTo(node.t) <= 0) {
-                node.left = addNode(node.left, parent, t);
+                node.left = addNode(node.left, node, t);
             } else {
-                node.right = addNode(node.right, parent, t);
+                node.right = addNode(node.right, node, t);
             }
         }
         return node;
